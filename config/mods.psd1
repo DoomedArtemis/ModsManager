@@ -1,0 +1,4 @@
+@{
+    IncomingRoot = 'incoming'
+    ModsRoot = 'mods'
+}

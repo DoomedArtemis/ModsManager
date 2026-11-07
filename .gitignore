@@ -1,0 +1,7 @@
+config/*.local.psd1
+config/*.local.psd1.tmp.psd1
+config/publish-state.local.json
+config/publish-state.local.json.tmp
+config/minecraft-java.json.tmp
+.idea/workspace.xml
+.idea/shelf/
