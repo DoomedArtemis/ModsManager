@@ -6,6 +6,7 @@ Add-Type -AssemblyName System.Net.Http
 . (Join-Path $PSScriptRoot 'mod-runtime.ps1')
 . (Join-Path $PSScriptRoot 'jar-metadata.ps1')
 . (Join-Path $PSScriptRoot 'mod-changelog.ps1')
+. (Join-Path $PSScriptRoot 'mod-dependencies.ps1')
 
 function Get-Setting($Table, [string]$Key, $Default = $null) {
     if ($Table.ContainsKey($Key)) { return $Table[$Key] }
@@ -75,12 +76,13 @@ function Read-ModJar([string]$Path) {
             foreach ($dep in $rootMetadata.Dependencies) {
                 if ((Get-Setting $dep 'modId' '') -eq 'minecraft') {
                     $minecraftConstraint = [string](Get-Setting $dep 'versionRange' '')
-                    Assert-JarMinecraftConstraint $minecraftConstraint $item.Minecraft
+                    foreach ($game in @(Resolve-MinecraftVersions $item.Minecraft)) { Assert-JarMinecraftConstraint $minecraftConstraint $game }
                 }
             }
         }
         $item | Add-Member -NotePropertyName Metadata -NotePropertyValue ([pscustomobject]@{ ModId = $modId; DisplayName = $displayName; Release = $declaredVersion; MinecraftConstraint = $minecraftConstraint })
         $item | Add-Member -NotePropertyName RuntimeEvidence -NotePropertyValue (Get-JarRuntimeEvidence $zip $item.Loader $rootMetadata)
+        $item | Add-Member -NotePropertyName DeclaredDependencies -NotePropertyValue @(Get-JarDependencyDeclarations $zip $item.Loader $rootMetadata)
     } finally { $zip.Dispose() }
     return $item
 }
@@ -98,7 +100,7 @@ function New-ModSettings($Workspace, [string]$Name) {
         # auto works for explicit environment restrictions in the manifest.
         # For '*' or Forge/NeoForge choose an environment explicitly; e.g.
         # client_and_server, client_only, server_only, client_or_server.
-        Environment = 'auto'
+        Environment = 'auto' # Shared by every loader, Minecraft target and mod release.
         # Java is selected automatically from config/minecraft-java.json.
         # Minecraft version, loader and mod version are read from each JAR.
         AllowPreviewFeatures = $false
@@ -111,8 +113,9 @@ function New-ModSettings($Workspace, [string]$Name) {
     )
     Modrinth = @{
         Enabled = $true
+        DependencyMode = 'auto' # Scan each JAR; 'manual' uses only Dependencies below.
         Project = '' # Project ID, slug, or https://modrinth.com/mod/<slug>
-        VersionType = 'release' # release, beta, alpha
+        # Release channel is detected from each JAR's mod version.
         Status = 'listed'
         Featured = $false
         # Release notes are selected from changelog.md by mod version.
@@ -125,8 +128,9 @@ function New-ModSettings($Workspace, [string]$Name) {
     }
     CurseForge = @{
         Enabled = $true
+        DependencyMode = 'auto'
         Project = '' # Numeric project ID or authors dashboard project URL
-        ReleaseType = 'release'
+        # Release channel is detected from each JAR's mod version.
         ChangelogType = 'markdown'
         ManualRelease = $false
         # Release notes are selected from changelog.md by mod version.
@@ -194,31 +198,70 @@ function Test-GameSelection([string]$Game, [string[]]$Selection) {
     foreach ($part in ($Selection -join ',').Split(',')) {
         $part = $part.Trim()
         if ($part -eq 'all' -or $part -eq $Game) { return $true }
-        if ($part -match '^(.+?)(?:\.\.|\s+to\s+)(.+)$') {
+        if ($part -match '^(\d+(?:\.\d+){1,3})\s*(?:\.\.|-|\s+to\s+)\s*(\d+(?:\.\d+){1,3})$') {
             $low = $Matches[1].Trim(); $high = $Matches[2].Trim()
             if ((Compare-GameVersion $low $high) -gt 0) { throw "Reversed range: $part" }
-            if ((Compare-GameVersion $Game $low) -ge 0 -and (Compare-GameVersion $Game $high) -le 0) { return $true }
+            foreach ($target in @(Resolve-MinecraftVersions $Game)) {
+                if ($target -match '^\d+(\.\d+){1,3}$' -and (Compare-GameVersion $target $low) -ge 0 -and (Compare-GameVersion $target $high) -le 0) { return $true }
+            }
+        } else {
+            $selected = @(Resolve-MinecraftVersions $part)
+            foreach ($target in @(Resolve-MinecraftVersions $Game)) { if ($target -cin $selected) { return $true } }
         }
     }
     return $false
 }
 
+function Resolve-MinecraftVersions([string]$Expression) {
+    $prefix = ''; $low = ''; $high = ''
+    if ($Expression -match '^(\d+(?:\.\d+){1,2})\.[xX]$') {
+        $prefix = $Matches[1]
+    } elseif ($Expression -match '^(\d+(?:\.\d+){1,3})\s*(?:\.\.|-|\s+to\s+)\s*(\d+(?:\.\d+){1,3})$') {
+        $low = $Matches[1]; $high = $Matches[2]
+        if ((Compare-GameVersion $low $high) -gt 0) { throw "Reversed range: $Expression" }
+    } else {
+        if ($Expression -match '\.[xX](?:$|[-.])') { throw "Invalid Minecraft version expression '$Expression'. Use a release, 26.1.x, or 1.21.1-1.21.3." }
+        return $Expression
+    }
+    $mapping = Get-MinecraftJavaMapping
+    if ($script:MinecraftVersionExpansionCache.ContainsKey($Expression)) { return $script:MinecraftVersionExpansionCache[$Expression] }
+    if ($low -and (-not $mapping.ContainsKey($low) -or -not $mapping.ContainsKey($high))) {
+        throw "Minecraft range '$Expression' has an unknown endpoint. Run scripts/sync-minecraft-java.ps1."
+    }
+    $targets = @($mapping.Keys | Where-Object {
+        if ($_ -notmatch '^\d+(\.\d+){1,3}$' -or $mapping[$_].Type -ne 'release') { return $false }
+        if ($prefix) { return $_ -ceq $prefix -or $_.StartsWith($prefix + '.', [StringComparison]::Ordinal) }
+        return (Compare-GameVersion $_ $low) -ge 0 -and (Compare-GameVersion $_ $high) -le 0
+    } | Sort-Object -Property @{ Expression = { [version]$_ } })
+    if (-not $targets.Count) { throw "Minecraft expression '$Expression' matches no known releases. Run scripts/sync-minecraft-java.ps1." }
+    $script:MinecraftVersionExpansionCache[$Expression] = $targets
+    return $targets
+}
+
 function Test-Dependency($Dependency, $Item) {
     if (-not (Get-Setting $Dependency 'Enabled' $true)) { return $false }
     if ($Dependency.ContainsKey('Loaders') -and $Item.Loader -notin $Dependency.Loaders) { return $false }
-    if ($Dependency.ContainsKey('Versions') -and -not (Test-GameSelection $Item.Minecraft $Dependency.Versions)) { return $false }
-    if ($Dependency.ContainsKey('ExcludeVersions') -and (Test-GameSelection $Item.Minecraft $Dependency.ExcludeVersions)) { return $false }
-    foreach ($key in @('MinVersion', 'MaxVersion', 'AfterVersion', 'BeforeVersion')) {
-        if (-not $Dependency.ContainsKey($key)) { continue }
-        $cmp = Compare-GameVersion $Item.Minecraft $Dependency[$key]
-        if (($key -eq 'MinVersion' -and $cmp -lt 0) -or ($key -eq 'MaxVersion' -and $cmp -gt 0) -or ($key -eq 'AfterVersion' -and $cmp -le 0) -or ($key -eq 'BeforeVersion' -and $cmp -ge 0)) { return $false }
+    foreach ($game in @(Resolve-MinecraftVersions $Item.Minecraft)) {
+        if ($Dependency.ContainsKey('Versions') -and -not (Test-GameSelection $game $Dependency.Versions)) { continue }
+        if ($Dependency.ContainsKey('ExcludeVersions') -and (Test-GameSelection $game $Dependency.ExcludeVersions)) { continue }
+        $matchesBounds = $true
+        foreach ($key in @('MinVersion', 'MaxVersion', 'AfterVersion', 'BeforeVersion')) {
+            if (-not $Dependency.ContainsKey($key)) { continue }
+            $cmp = Compare-GameVersion $game $Dependency[$key]
+            if (($key -eq 'MinVersion' -and $cmp -lt 0) -or ($key -eq 'MaxVersion' -and $cmp -gt 0) -or ($key -eq 'AfterVersion' -and $cmp -le 0) -or ($key -eq 'BeforeVersion' -and $cmp -ge 0)) { $matchesBounds = $false; break }
+        }
+        if ($matchesBounds) { return $true }
     }
-    return $true
+    return $false
 }
 
 function Get-Dependencies($Settings, $Item, [string]$Platform) {
     $selected = [Collections.Generic.Dictionary[string,object]]::new([StringComparer]::Ordinal)
-    foreach ($dep in (Get-Setting $Settings 'Dependencies' @())) {
+    $mode = Get-Setting $Settings 'DependencyMode' 'manual'
+    if ($mode -notin @('auto', 'manual')) { throw 'DependencyMode must be auto or manual.' }
+    $dependencies = @(Get-Setting $Settings 'Dependencies' @())
+    if ($mode -eq 'auto') { $dependencies = @(Get-AutomaticDependencies $Item $Platform) + $dependencies }
+    foreach ($dep in $dependencies) {
         if (-not (Test-Dependency $dep $Item)) { continue }
         if ($Platform -eq 'Modrinth') {
             $relation = [ordered]@{ dependency_type = (Get-Setting $dep 'Type' 'optional') }
@@ -249,6 +292,16 @@ function Get-Dependencies($Settings, $Item, [string]$Platform) {
         $selected[$identity] = @{ Json = $json; Relation = $relation }
     }
     return @($selected.Values | Sort-Object Json | ForEach-Object { $_.Relation })
+}
+
+function Get-ModReleaseType([string]$Release) {
+    # Build metadata is not a prerelease marker. Numeric releases are stable;
+    # short a/b suffixes and explicit alpha/beta labels identify prereleases.
+    $version = $Release.Split('+')[0]
+    if ($version -match '^\d+(?:\.\d+)*$') { return 'release' }
+    if ($version -match '^\d+(?:\.\d+)*(?:[-_.]?(?:alpha|a)(?:[._-]?\d+)?)$') { return 'alpha' }
+    if ($version -match '^\d+(?:\.\d+)*(?:[-_.]?(?:beta|b)(?:[._-]?\d+)?)$') { return 'beta' }
+    throw "Automatic release channel: cannot classify mod version '$Release'. Use a numeric release (1.0), alpha (1.0a or 1.0-alpha.1), or beta (1.0b or 1.0-beta.1)."
 }
 
 function Get-UploadPlan($Workspace, $Items, [string]$Platform, [hashtable]$ProjectOverrides = @{}, [AllowNull()][string]$Changelog, [bool]$OverrideChangelog = $false, [hashtable]$SettingsOverrides = @{}) {
@@ -283,9 +336,9 @@ function Get-UploadPlan($Workspace, $Items, [string]$Platform, [hashtable]$Proje
         else { $log = Read-ModReleaseChangelog $Workspace $item.Mod $item.Release }
         $dependencies = @(Get-Dependencies $settings $item $Platform)
         $uploadLoaders = @($item.Loader)
+        $type = Get-ModReleaseType $item.Release
         if ($item.Loader -eq 'forge' -and $item.Minecraft -eq '1.20.1') { $uploadLoaders += 'neoforge' }
         if ($Platform -eq 'Modrinth') {
-            $type = Get-Setting $settings 'VersionType' 'release'
             $status = Get-Setting $settings 'Status' 'listed'
             if ($status -notin @('listed', 'archived', 'draft', 'unlisted')) { throw 'Invalid Modrinth status.' }
             $data = [ordered]@{
@@ -300,7 +353,6 @@ function Get-UploadPlan($Workspace, $Items, [string]$Platform, [hashtable]$Proje
                 $data.requested_status = $settings.RequestedStatus
             }
         } else {
-            $type = Get-Setting $settings 'ReleaseType' 'release'
             $format = 'markdown'
             if ($OverrideChangelog) { $format = Get-Setting $settings 'ChangelogType' 'markdown' }
             if ($format -notin @('markdown', 'text', 'html')) { throw 'Invalid CurseForge changelog type.' }

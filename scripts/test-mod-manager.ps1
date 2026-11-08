@@ -25,6 +25,7 @@ try {
     New-Item -ItemType Directory -Path (Join-Path $tempRoot 'config') -Force | Out-Null
     Copy-Item -LiteralPath (Join-Path (Split-Path $PSScriptRoot -Parent) 'config/mods.psd1') -Destination (Join-Path $tempRoot 'config/mods.psd1')
     Copy-Item -LiteralPath (Join-Path (Split-Path $PSScriptRoot -Parent) 'config/minecraft-java.json') -Destination (Join-Path $tempRoot 'config/minecraft-java.json')
+    Copy-Item -LiteralPath (Join-Path (Split-Path $PSScriptRoot -Parent) 'config/dependency-projects.psd1') -Destination (Join-Path $tempRoot 'config/dependency-projects.psd1')
     $w = Get-Workspace $tempRoot
     New-Item -ItemType Directory -Path $w.IncomingRoot -Force | Out-Null
     $jar = Join-Path $w.IncomingRoot 'omniwheel-2.1.0-fabric-mc26.3.jar'
@@ -59,7 +60,10 @@ try {
     . (Join-Path $PSScriptRoot 'test-minecraft-java.ps1')
     . (Join-Path $PSScriptRoot 'test-mod-runtime.ps1')
     . (Join-Path $PSScriptRoot 'test-mod-changelog.ps1')
+    . (Join-Path $PSScriptRoot 'test-add-changelog.ps1')
+    . (Join-Path $PSScriptRoot 'test-remove-changelog.ps1')
     . (Join-Path $PSScriptRoot 'test-publish-setup.ps1')
+    . (Join-Path $PSScriptRoot 'test-shared-environment.ps1')
     $settings = @{ Dependencies = @(
         @{ ProjectId = 'P7dR8mSH'; Type = 'required'; Loaders = @('fabric'); Versions = @('26.3') }
         @{ ProjectId = 'P7dR8mSH'; Type = 'required'; MinVersion = '26.2' }
@@ -151,6 +155,9 @@ public class ModsTestHandler : HttpMessageHandler {
     . (Join-Path $PSScriptRoot 'test-modrinth-projects.ps1')
     . (Join-Path $PSScriptRoot 'test-publish-batch.ps1')
     . (Join-Path $PSScriptRoot 'test-publish-both.ps1')
+    . (Join-Path $PSScriptRoot 'test-minecraft-ranges.ps1')
+    . (Join-Path $PSScriptRoot 'test-mod-dependencies.ps1')
+    . (Join-Path $PSScriptRoot 'test-release-types.ps1')
     # Check local settings protection in a real temporary git repository.
     & git -C $tempRoot init --quiet
     if ($LASTEXITCODE -ne 0) { throw 'Could not initialize test git repository.' }
@@ -160,7 +167,7 @@ public class ModsTestHandler : HttpMessageHandler {
     Assert ((Read-LocalSettings $w 'Modrinth').Projects.omniwheel -eq 'private-slug') 'Local project settings loaded'
     $testScripts = Join-Path $tempRoot 'scripts'
     New-Item -ItemType Directory -Path $testScripts | Out-Null
-    foreach ($scriptName in @('mod-manager.ps1', 'mod-runtime.ps1', 'jar-metadata.ps1', 'mod-changelog.ps1', 'publish-setup.ps1', 'publish-mods.ps1')) {
+    foreach ($scriptName in @('mod-manager.ps1', 'mod-runtime.ps1', 'jar-metadata.ps1', 'mod-changelog.ps1', 'mod-dependencies.ps1', 'publish-setup.ps1', 'publish-mods.ps1', 'scan-dependencies.ps1', 'changelog-setup.ps1', 'changelog-editor.ps1', 'add-changelog.ps1', 'remove-changelog.ps1')) {
         Copy-Item -LiteralPath (Join-Path $PSScriptRoot $scriptName) -Destination (Join-Path $testScripts $scriptName)
     }
     Remove-Item -LiteralPath (Join-Path $w.ModsRoot 'omniwheel/mod.publish.psd1')
@@ -172,6 +179,12 @@ public class ModsTestHandler : HttpMessageHandler {
     [IO.File]::WriteAllText($changelogPath, $fileMarkdown, [Text.UTF8Encoding]::new($false))
     $filePreview = @(& powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $testScripts 'publish-mods.ps1') -Platform Modrinth -Mod omniwheel -NonInteractive -ChangelogFile $changelogPath)
     Assert ($LASTEXITCODE -eq 0 -and ($filePreview -join "`n").Contains(($fileMarkdown | ConvertTo-Json -Compress))) 'CLI Markdown file override preserves line breaks without prompting'
+    $changelogAction = @(& powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $testScripts 'add-changelog.ps1') -Mod omniwheel -ReleaseVersion '2.3.0' -ChangelogFile $changelogPath)
+    Assert ($LASTEXITCODE -eq 0 -and ($changelogAction -join "`n") -match 'Saved omniwheel 2.3.0 changelog') 'Add Changelog command runs from its script entry point'
+    Assert ((Read-ModReleaseChangelog $w 'omniwheel' '2.3.0') -ceq $fileMarkdown.Trim([char[]]"`r`n")) 'Add Changelog CLI saves the complete Markdown file under the requested release'
+    $removeAction = @(& powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $testScripts 'remove-changelog.ps1') -Mod omniwheel -ReleaseVersion '2.3.0' -Yes)
+    Assert ($LASTEXITCODE -eq 0 -and ($removeAction -join "`n") -match 'Removed omniwheel 2.3.0 changelog section') 'Remove Changelog command runs from its script entry point'
+    Assert-Throws { Read-ModReleaseChangelog $w 'omniwheel' '2.3.0' } 'Changelog: add a ## 2.3.0'
     $fixtureConfigPath = Join-Path $w.ModsRoot 'omniwheel/mod.publish.psd1'
     $originalFixtureConfig = [IO.File]::ReadAllText($fixtureConfigPath)
     try {

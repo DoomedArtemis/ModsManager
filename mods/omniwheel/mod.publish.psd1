@@ -6,7 +6,6 @@
         'Enabled' = $true
         'ManualRelease' = $false
         'Project' = '1645840'
-        'ReleaseType' = 'release'
     }
     'DisplayName' = 'Omni Wheel'
     'InteractiveSetup' = @{
@@ -18,7 +17,6 @@
         'Featured' = $false
         'Project' = 'isSnF43I'
         'Status' = 'listed'
-        'VersionType' = 'release'
     }
     'Overrides' = @(
         @{
@@ -38,11 +36,9 @@
                     'Enabled' = $true
                     'Featured' = $false
                     'Status' = 'listed'
-                    'VersionType' = 'release'
                 }
                 'Runtime' = @{
                     'AllowPreviewFeatures' = $false
-                    'Environment' = 'client_only'
                 }
             }
             'Versions' = @(
@@ -96,11 +92,9 @@
                     'Enabled' = $true
                     'Featured' = $false
                     'Status' = 'listed'
-                    'VersionType' = 'release'
                 }
                 'Runtime' = @{
                     'AllowPreviewFeatures' = $false
-                    'Environment' = 'client_only'
                 }
             }
             'Versions' = @(
@@ -124,11 +118,9 @@
                     'Enabled' = $true
                     'Featured' = $false
                     'Status' = 'listed'
-                    'VersionType' = 'release'
                 }
                 'Runtime' = @{
                     'AllowPreviewFeatures' = $false
-                    'Environment' = 'client_only'
                 }
             }
             'Versions' = @(
@@ -152,11 +144,9 @@
                     'Enabled' = $true
                     'Featured' = $false
                     'Status' = 'listed'
-                    'VersionType' = 'release'
                 }
                 'Runtime' = @{
                     'AllowPreviewFeatures' = $false
-                    'Environment' = 'client_only'
                 }
             }
             'Versions' = @(
@@ -180,11 +170,9 @@
                     'Enabled' = $true
                     'Featured' = $false
                     'Status' = 'listed'
-                    'VersionType' = 'release'
                 }
                 'Runtime' = @{
                     'AllowPreviewFeatures' = $false
-                    'Environment' = 'client_only'
                 }
             }
             'Versions' = @(
@@ -204,7 +192,6 @@
                     'Dependencies' = @()
                     'Enabled' = $true
                     'ManualRelease' = $false
-                    'ReleaseType' = 'release'
                 }
                 'InteractiveSetup' = @{
                     'CurseForgeComplete' = $true
@@ -227,7 +214,6 @@
                     'Dependencies' = @()
                     'Enabled' = $true
                     'ManualRelease' = $false
-                    'ReleaseType' = 'release'
                 }
                 'InteractiveSetup' = @{
                     'CurseForgeComplete' = $true
@@ -250,7 +236,6 @@
                     'Dependencies' = @()
                     'Enabled' = $true
                     'ManualRelease' = $false
-                    'ReleaseType' = 'release'
                 }
                 'InteractiveSetup' = @{
                     'CurseForgeComplete' = $true
@@ -273,7 +258,6 @@
                     'Dependencies' = @()
                     'Enabled' = $true
                     'ManualRelease' = $false
-                    'ReleaseType' = 'release'
                 }
                 'InteractiveSetup' = @{
                     'CurseForgeComplete' = $true
@@ -296,7 +280,6 @@
                     'Dependencies' = @()
                     'Enabled' = $true
                     'ManualRelease' = $false
-                    'ReleaseType' = 'release'
                 }
                 'InteractiveSetup' = @{
                     'CurseForgeComplete' = $true
@@ -383,11 +366,9 @@
                     'Enabled' = $true
                     'Featured' = $false
                     'Status' = 'listed'
-                    'VersionType' = 'release'
                 }
                 'Runtime' = @{
                     'AllowPreviewFeatures' = $false
-                    'Environment' = 'client_only'
                 }
             }
             'Versions' = @(
@@ -407,7 +388,6 @@
                     'Dependencies' = @()
                     'Enabled' = $true
                     'ManualRelease' = $false
-                    'ReleaseType' = 'release'
                 }
                 'InteractiveSetup' = @{
                     'CurseForgeComplete' = $true
@@ -434,11 +414,9 @@
                     'Enabled' = $true
                     'Featured' = $false
                     'Status' = 'listed'
-                    'VersionType' = 'release'
                 }
                 'Runtime' = @{
                     'AllowPreviewFeatures' = $false
-                    'Environment' = 'client_only'
                 }
             }
             'Versions' = @(
@@ -462,11 +440,9 @@
                     'Enabled' = $true
                     'Featured' = $false
                     'Status' = 'listed'
-                    'VersionType' = 'release'
                 }
                 'Runtime' = @{
                     'AllowPreviewFeatures' = $false
-                    'Environment' = 'client_only'
                 }
             }
             'Versions' = @(
@@ -490,11 +466,9 @@
                     'Enabled' = $true
                     'Featured' = $false
                     'Status' = 'listed'
-                    'VersionType' = 'release'
                 }
                 'Runtime' = @{
                     'AllowPreviewFeatures' = $false
-                    'Environment' = 'client_only'
                 }
             }
             'Versions' = @(
@@ -518,11 +492,9 @@
                     'Enabled' = $true
                     'Featured' = $false
                     'Status' = 'listed'
-                    'VersionType' = 'release'
                 }
                 'Runtime' = @{
                     'AllowPreviewFeatures' = $false
-                    'Environment' = 'client_only'
                 }
             }
             'Versions' = @(
@@ -546,11 +518,9 @@
                     'Enabled' = $true
                     'Featured' = $false
                     'Status' = 'listed'
-                    'VersionType' = 'release'
                 }
                 'Runtime' = @{
                     'AllowPreviewFeatures' = $false
-                    'Environment' = 'client_only'
                 }
             }
             'Versions' = @(
@@ -574,11 +544,9 @@
                     'Enabled' = $true
                     'Featured' = $false
                     'Status' = 'listed'
-                    'VersionType' = 'release'
                 }
                 'Runtime' = @{
                     'AllowPreviewFeatures' = $false
-                    'Environment' = 'client_only'
                 }
             }
             'Versions' = @(
@@ -602,11 +570,9 @@
                     'Enabled' = $true
                     'Featured' = $false
                     'Status' = 'listed'
-                    'VersionType' = 'release'
                 }
                 'Runtime' = @{
                     'AllowPreviewFeatures' = $false
-                    'Environment' = 'client_only'
                 }
             }
             'Versions' = @(
@@ -630,11 +596,9 @@
                     'Enabled' = $true
                     'Featured' = $false
                     'Status' = 'listed'
-                    'VersionType' = 'release'
                 }
                 'Runtime' = @{
                     'AllowPreviewFeatures' = $false
-                    'Environment' = 'client_only'
                 }
             }
             'Versions' = @(
@@ -658,11 +622,9 @@
                     'Enabled' = $true
                     'Featured' = $false
                     'Status' = 'listed'
-                    'VersionType' = 'release'
                 }
                 'Runtime' = @{
                     'AllowPreviewFeatures' = $false
-                    'Environment' = 'client_only'
                 }
             }
             'Versions' = @(
@@ -686,11 +648,9 @@
                     'Enabled' = $true
                     'Featured' = $false
                     'Status' = 'listed'
-                    'VersionType' = 'release'
                 }
                 'Runtime' = @{
                     'AllowPreviewFeatures' = $false
-                    'Environment' = 'client_only'
                 }
             }
             'Versions' = @(
@@ -714,11 +674,9 @@
                     'Enabled' = $true
                     'Featured' = $false
                     'Status' = 'listed'
-                    'VersionType' = 'release'
                 }
                 'Runtime' = @{
                     'AllowPreviewFeatures' = $false
-                    'Environment' = 'client_only'
                 }
             }
             'Versions' = @(
@@ -742,11 +700,9 @@
                     'Enabled' = $true
                     'Featured' = $false
                     'Status' = 'listed'
-                    'VersionType' = 'release'
                 }
                 'Runtime' = @{
                     'AllowPreviewFeatures' = $false
-                    'Environment' = 'client_only'
                 }
             }
             'Versions' = @(
@@ -770,11 +726,9 @@
                     'Enabled' = $true
                     'Featured' = $false
                     'Status' = 'listed'
-                    'VersionType' = 'release'
                 }
                 'Runtime' = @{
                     'AllowPreviewFeatures' = $false
-                    'Environment' = 'client_only'
                 }
             }
             'Versions' = @(
@@ -798,11 +752,9 @@
                     'Enabled' = $true
                     'Featured' = $false
                     'Status' = 'listed'
-                    'VersionType' = 'release'
                 }
                 'Runtime' = @{
                     'AllowPreviewFeatures' = $false
-                    'Environment' = 'client_only'
                 }
             }
             'Versions' = @(
@@ -826,11 +778,9 @@
                     'Enabled' = $true
                     'Featured' = $false
                     'Status' = 'listed'
-                    'VersionType' = 'release'
                 }
                 'Runtime' = @{
                     'AllowPreviewFeatures' = $false
-                    'Environment' = 'client_only'
                 }
             }
             'Versions' = @(
@@ -854,11 +804,9 @@
                     'Enabled' = $true
                     'Featured' = $false
                     'Status' = 'listed'
-                    'VersionType' = 'release'
                 }
                 'Runtime' = @{
                     'AllowPreviewFeatures' = $false
-                    'Environment' = 'client_only'
                 }
             }
             'Versions' = @(
@@ -882,11 +830,9 @@
                     'Enabled' = $true
                     'Featured' = $false
                     'Status' = 'listed'
-                    'VersionType' = 'release'
                 }
                 'Runtime' = @{
                     'AllowPreviewFeatures' = $false
-                    'Environment' = 'client_only'
                 }
             }
             'Versions' = @(
@@ -910,11 +856,9 @@
                     'Enabled' = $true
                     'Featured' = $false
                     'Status' = 'listed'
-                    'VersionType' = 'release'
                 }
                 'Runtime' = @{
                     'AllowPreviewFeatures' = $false
-                    'Environment' = 'client_only'
                 }
             }
             'Versions' = @(
@@ -938,11 +882,9 @@
                     'Enabled' = $true
                     'Featured' = $false
                     'Status' = 'listed'
-                    'VersionType' = 'release'
                 }
                 'Runtime' = @{
                     'AllowPreviewFeatures' = $false
-                    'Environment' = 'client_only'
                 }
             }
             'Versions' = @(
@@ -966,11 +908,9 @@
                     'Enabled' = $true
                     'Featured' = $false
                     'Status' = 'listed'
-                    'VersionType' = 'release'
                 }
                 'Runtime' = @{
                     'AllowPreviewFeatures' = $false
-                    'Environment' = 'client_only'
                 }
             }
             'Versions' = @(
@@ -994,11 +934,9 @@
                     'Enabled' = $true
                     'Featured' = $false
                     'Status' = 'listed'
-                    'VersionType' = 'release'
                 }
                 'Runtime' = @{
                     'AllowPreviewFeatures' = $false
-                    'Environment' = 'client_only'
                 }
             }
             'Versions' = @(
@@ -1022,11 +960,9 @@
                     'Enabled' = $true
                     'Featured' = $false
                     'Status' = 'listed'
-                    'VersionType' = 'release'
                 }
                 'Runtime' = @{
                     'AllowPreviewFeatures' = $false
-                    'Environment' = 'client_only'
                 }
             }
             'Versions' = @(
@@ -1050,11 +986,9 @@
                     'Enabled' = $true
                     'Featured' = $false
                     'Status' = 'listed'
-                    'VersionType' = 'release'
                 }
                 'Runtime' = @{
                     'AllowPreviewFeatures' = $false
-                    'Environment' = 'client_only'
                 }
             }
             'Versions' = @(
@@ -1078,11 +1012,9 @@
                     'Enabled' = $true
                     'Featured' = $false
                     'Status' = 'listed'
-                    'VersionType' = 'release'
                 }
                 'Runtime' = @{
                     'AllowPreviewFeatures' = $false
-                    'Environment' = 'client_only'
                 }
             }
             'Versions' = @(
@@ -1106,11 +1038,9 @@
                     'Enabled' = $true
                     'Featured' = $false
                     'Status' = 'listed'
-                    'VersionType' = 'release'
                 }
                 'Runtime' = @{
                     'AllowPreviewFeatures' = $false
-                    'Environment' = 'client_only'
                 }
             }
             'Versions' = @(
@@ -1134,11 +1064,9 @@
                     'Enabled' = $true
                     'Featured' = $false
                     'Status' = 'listed'
-                    'VersionType' = 'release'
                 }
                 'Runtime' = @{
                     'AllowPreviewFeatures' = $false
-                    'Environment' = 'client_only'
                 }
             }
             'Versions' = @(
@@ -1162,11 +1090,9 @@
                     'Enabled' = $true
                     'Featured' = $false
                     'Status' = 'listed'
-                    'VersionType' = 'release'
                 }
                 'Runtime' = @{
                     'AllowPreviewFeatures' = $false
-                    'Environment' = 'client_only'
                 }
             }
             'Versions' = @(
@@ -1190,11 +1116,9 @@
                     'Enabled' = $true
                     'Featured' = $false
                     'Status' = 'listed'
-                    'VersionType' = 'release'
                 }
                 'Runtime' = @{
                     'AllowPreviewFeatures' = $false
-                    'Environment' = 'client_only'
                 }
             }
             'Versions' = @(
@@ -1218,11 +1142,9 @@
                     'Enabled' = $true
                     'Featured' = $false
                     'Status' = 'listed'
-                    'VersionType' = 'release'
                 }
                 'Runtime' = @{
                     'AllowPreviewFeatures' = $false
-                    'Environment' = 'client_only'
                 }
             }
             'Versions' = @(
@@ -1246,11 +1168,9 @@
                     'Enabled' = $true
                     'Featured' = $false
                     'Status' = 'listed'
-                    'VersionType' = 'release'
                 }
                 'Runtime' = @{
                     'AllowPreviewFeatures' = $false
-                    'Environment' = 'client_only'
                 }
             }
             'Versions' = @(
@@ -1274,11 +1194,9 @@
                     'Enabled' = $true
                     'Featured' = $false
                     'Status' = 'listed'
-                    'VersionType' = 'release'
                 }
                 'Runtime' = @{
                     'AllowPreviewFeatures' = $false
-                    'Environment' = 'client_only'
                 }
             }
             'Versions' = @(
@@ -1302,11 +1220,9 @@
                     'Enabled' = $true
                     'Featured' = $false
                     'Status' = 'listed'
-                    'VersionType' = 'release'
                 }
                 'Runtime' = @{
                     'AllowPreviewFeatures' = $false
-                    'Environment' = 'client_only'
                 }
             }
             'Versions' = @(
@@ -1330,11 +1246,9 @@
                     'Enabled' = $true
                     'Featured' = $false
                     'Status' = 'listed'
-                    'VersionType' = 'release'
                 }
                 'Runtime' = @{
                     'AllowPreviewFeatures' = $false
-                    'Environment' = 'client_only'
                 }
             }
             'Versions' = @(
@@ -1358,11 +1272,9 @@
                     'Enabled' = $true
                     'Featured' = $false
                     'Status' = 'listed'
-                    'VersionType' = 'release'
                 }
                 'Runtime' = @{
                     'AllowPreviewFeatures' = $false
-                    'Environment' = 'client_only'
                 }
             }
             'Versions' = @(
@@ -1382,7 +1294,6 @@
                     'Dependencies' = @()
                     'Enabled' = $true
                     'ManualRelease' = $false
-                    'ReleaseType' = 'release'
                 }
                 'InteractiveSetup' = @{
                     'CurseForgeComplete' = $true
@@ -1405,7 +1316,6 @@
                     'Dependencies' = @()
                     'Enabled' = $true
                     'ManualRelease' = $false
-                    'ReleaseType' = 'release'
                 }
                 'InteractiveSetup' = @{
                     'CurseForgeComplete' = $true
@@ -1428,7 +1338,6 @@
                     'Dependencies' = @()
                     'Enabled' = $true
                     'ManualRelease' = $false
-                    'ReleaseType' = 'release'
                 }
                 'InteractiveSetup' = @{
                     'CurseForgeComplete' = $true
@@ -1451,7 +1360,6 @@
                     'Dependencies' = @()
                     'Enabled' = $true
                     'ManualRelease' = $false
-                    'ReleaseType' = 'release'
                 }
                 'InteractiveSetup' = @{
                     'CurseForgeComplete' = $true
@@ -1474,7 +1382,6 @@
                     'Dependencies' = @()
                     'Enabled' = $true
                     'ManualRelease' = $false
-                    'ReleaseType' = 'release'
                 }
                 'InteractiveSetup' = @{
                     'CurseForgeComplete' = $true
@@ -1497,7 +1404,6 @@
                     'Dependencies' = @()
                     'Enabled' = $true
                     'ManualRelease' = $false
-                    'ReleaseType' = 'release'
                 }
                 'InteractiveSetup' = @{
                     'CurseForgeComplete' = $true
@@ -1520,7 +1426,6 @@
                     'Dependencies' = @()
                     'Enabled' = $true
                     'ManualRelease' = $false
-                    'ReleaseType' = 'release'
                 }
                 'InteractiveSetup' = @{
                     'CurseForgeComplete' = $true
@@ -1543,7 +1448,6 @@
                     'Dependencies' = @()
                     'Enabled' = $true
                     'ManualRelease' = $false
-                    'ReleaseType' = 'release'
                 }
                 'InteractiveSetup' = @{
                     'CurseForgeComplete' = $true
@@ -1566,7 +1470,6 @@
                     'Dependencies' = @()
                     'Enabled' = $true
                     'ManualRelease' = $false
-                    'ReleaseType' = 'release'
                 }
                 'InteractiveSetup' = @{
                     'CurseForgeComplete' = $true
@@ -1589,7 +1492,6 @@
                     'Dependencies' = @()
                     'Enabled' = $true
                     'ManualRelease' = $false
-                    'ReleaseType' = 'release'
                 }
                 'InteractiveSetup' = @{
                     'CurseForgeComplete' = $true
@@ -1612,7 +1514,6 @@
                     'Dependencies' = @()
                     'Enabled' = $true
                     'ManualRelease' = $false
-                    'ReleaseType' = 'release'
                 }
                 'InteractiveSetup' = @{
                     'CurseForgeComplete' = $true
@@ -1635,7 +1536,6 @@
                     'Dependencies' = @()
                     'Enabled' = $true
                     'ManualRelease' = $false
-                    'ReleaseType' = 'release'
                 }
                 'InteractiveSetup' = @{
                     'CurseForgeComplete' = $true
@@ -1658,7 +1558,6 @@
                     'Dependencies' = @()
                     'Enabled' = $true
                     'ManualRelease' = $false
-                    'ReleaseType' = 'release'
                 }
                 'InteractiveSetup' = @{
                     'CurseForgeComplete' = $true
@@ -1681,7 +1580,6 @@
                     'Dependencies' = @()
                     'Enabled' = $true
                     'ManualRelease' = $false
-                    'ReleaseType' = 'release'
                 }
                 'InteractiveSetup' = @{
                     'CurseForgeComplete' = $true
@@ -1704,7 +1602,6 @@
                     'Dependencies' = @()
                     'Enabled' = $true
                     'ManualRelease' = $false
-                    'ReleaseType' = 'release'
                 }
                 'InteractiveSetup' = @{
                     'CurseForgeComplete' = $true
@@ -1727,7 +1624,6 @@
                     'Dependencies' = @()
                     'Enabled' = $true
                     'ManualRelease' = $false
-                    'ReleaseType' = 'release'
                 }
                 'InteractiveSetup' = @{
                     'CurseForgeComplete' = $true
@@ -1750,7 +1646,6 @@
                     'Dependencies' = @()
                     'Enabled' = $true
                     'ManualRelease' = $false
-                    'ReleaseType' = 'release'
                 }
                 'InteractiveSetup' = @{
                     'CurseForgeComplete' = $true
@@ -1773,7 +1668,6 @@
                     'Dependencies' = @()
                     'Enabled' = $true
                     'ManualRelease' = $false
-                    'ReleaseType' = 'release'
                 }
                 'InteractiveSetup' = @{
                     'CurseForgeComplete' = $true
@@ -1796,7 +1690,6 @@
                     'Dependencies' = @()
                     'Enabled' = $true
                     'ManualRelease' = $false
-                    'ReleaseType' = 'release'
                 }
                 'InteractiveSetup' = @{
                     'CurseForgeComplete' = $true
@@ -1819,7 +1712,6 @@
                     'Dependencies' = @()
                     'Enabled' = $true
                     'ManualRelease' = $false
-                    'ReleaseType' = 'release'
                 }
                 'InteractiveSetup' = @{
                     'CurseForgeComplete' = $true
@@ -1842,7 +1734,6 @@
                     'Dependencies' = @()
                     'Enabled' = $true
                     'ManualRelease' = $false
-                    'ReleaseType' = 'release'
                 }
                 'InteractiveSetup' = @{
                     'CurseForgeComplete' = $true
@@ -1865,7 +1756,6 @@
                     'Dependencies' = @()
                     'Enabled' = $true
                     'ManualRelease' = $false
-                    'ReleaseType' = 'release'
                 }
                 'InteractiveSetup' = @{
                     'CurseForgeComplete' = $true
@@ -1888,7 +1778,6 @@
                     'Dependencies' = @()
                     'Enabled' = $true
                     'ManualRelease' = $false
-                    'ReleaseType' = 'release'
                 }
                 'InteractiveSetup' = @{
                     'CurseForgeComplete' = $true
@@ -1911,7 +1800,6 @@
                     'Dependencies' = @()
                     'Enabled' = $true
                     'ManualRelease' = $false
-                    'ReleaseType' = 'release'
                 }
                 'InteractiveSetup' = @{
                     'CurseForgeComplete' = $true
@@ -1934,7 +1822,6 @@
                     'Dependencies' = @()
                     'Enabled' = $true
                     'ManualRelease' = $false
-                    'ReleaseType' = 'release'
                 }
                 'InteractiveSetup' = @{
                     'CurseForgeComplete' = $true
@@ -1957,7 +1844,6 @@
                     'Dependencies' = @()
                     'Enabled' = $true
                     'ManualRelease' = $false
-                    'ReleaseType' = 'release'
                 }
                 'InteractiveSetup' = @{
                     'CurseForgeComplete' = $true
@@ -1980,7 +1866,6 @@
                     'Dependencies' = @()
                     'Enabled' = $true
                     'ManualRelease' = $false
-                    'ReleaseType' = 'release'
                 }
                 'InteractiveSetup' = @{
                     'CurseForgeComplete' = $true
@@ -2003,7 +1888,6 @@
                     'Dependencies' = @()
                     'Enabled' = $true
                     'ManualRelease' = $false
-                    'ReleaseType' = 'release'
                 }
                 'InteractiveSetup' = @{
                     'CurseForgeComplete' = $true
@@ -2026,7 +1910,6 @@
                     'Dependencies' = @()
                     'Enabled' = $true
                     'ManualRelease' = $false
-                    'ReleaseType' = 'release'
                 }
                 'InteractiveSetup' = @{
                     'CurseForgeComplete' = $true
@@ -2049,7 +1932,6 @@
                     'Dependencies' = @()
                     'Enabled' = $true
                     'ManualRelease' = $false
-                    'ReleaseType' = 'release'
                 }
                 'InteractiveSetup' = @{
                     'CurseForgeComplete' = $true
@@ -2072,7 +1954,6 @@
                     'Dependencies' = @()
                     'Enabled' = $true
                     'ManualRelease' = $false
-                    'ReleaseType' = 'release'
                 }
                 'InteractiveSetup' = @{
                     'CurseForgeComplete' = $true
@@ -2095,7 +1976,6 @@
                     'Dependencies' = @()
                     'Enabled' = $true
                     'ManualRelease' = $false
-                    'ReleaseType' = 'release'
                 }
                 'InteractiveSetup' = @{
                     'CurseForgeComplete' = $true
@@ -2118,7 +1998,6 @@
                     'Dependencies' = @()
                     'Enabled' = $true
                     'ManualRelease' = $false
-                    'ReleaseType' = 'release'
                 }
                 'InteractiveSetup' = @{
                     'CurseForgeComplete' = $true
@@ -2141,7 +2020,6 @@
                     'Dependencies' = @()
                     'Enabled' = $true
                     'ManualRelease' = $false
-                    'ReleaseType' = 'release'
                 }
                 'InteractiveSetup' = @{
                     'CurseForgeComplete' = $true
@@ -2154,6 +2032,6 @@
     )
     'Runtime' = @{
         'AllowPreviewFeatures' = $false
-        'Environment' = 'auto'
+        'Environment' = 'client_only'
     }
 }

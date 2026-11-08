@@ -19,7 +19,6 @@ function Test-PublishSetupWorkflow($Workspace, $FixtureItem) {
         foreach ($answer in @(
             'not-a-numeric-id', '123456', "Omniwheel's mod",
             'invalid-environment', '2',
-            'gold', 'beta',
             'replace', 'INVALID SLUG', 'fabric-api', 'bad-id', '306612', '1', 'no',
             'yes', 'markdown', 'yes', 'Java 25', '12345'
         )) { $answers.Enqueue($answer) }
@@ -33,13 +32,13 @@ function Test-PublishSetupWorkflow($Workspace, $FixtureItem) {
         Assert ($savedEffective.Runtime.Environment -eq 'client_only' -and -not $savedEffective.Runtime.ContainsKey('JavaVersions')) 'Environment saved without a per-mod Java declaration'
         Assert ($savedEffective.CurseForge.Dependencies.Count -eq 1 -and $savedEffective.CurseForge.Dependencies[0].Slug -eq 'fabric-api') 'Dependency wizard persists relations'
         $savedPlan = @(Get-UploadPlan $Workspace @($FixtureItem) 'CurseForge')[0]
-        Assert ($savedPlan.Data.releaseType -eq 'beta' -and $savedPlan.Data.isMarkedForManualRelease) 'Channel and advanced choices reach upload plan'
+        Assert ($savedPlan.Data.releaseType -eq 'release' -and $savedPlan.Data.isMarkedForManualRelease) 'Automatic channel and advanced choices reach upload plan'
         Assert ($savedPlan.Data.gameVersions[0] -eq 12345 -and $savedPlan.Data.gameVersionNames -contains 'Java 25') 'Advanced compatibility choices reach upload plan'
         Assert ($savedPlan.Data.changelog -ceq $fixtureNotes) 'Release notes are selected from the per-mod Markdown file without prompting'
         Invoke-ModPublishSetup $Workspace @($FixtureItem) 'CurseForge' @{}
         Assert ($answers.Count -eq 0) 'Configured release reused without prompting'
         # Only platform settings are needed on the second platform; runtime is shared.
-        foreach ($answer in @('omniwheel', 'release', 'replace', 'project', 'bad', 'P7dR8mSH', '', 'required', 'no', 'yes', 'unlisted', 'yes', 'default')) { $answers.Enqueue($answer) }
+        foreach ($answer in @('omniwheel', 'replace', 'project', 'bad', 'P7dR8mSH', '', 'required', 'no', 'yes', 'unlisted', 'yes', 'default')) { $answers.Enqueue($answer) }
         Invoke-ModPublishSetup $Workspace @($FixtureItem) 'Modrinth' @{}
         Assert ($answers.Count -eq 0) 'Second platform reuses runtime answers'
         $savedMR = @(Get-UploadPlan $Workspace @($FixtureItem) 'Modrinth')[0]
@@ -48,9 +47,9 @@ function Test-PublishSetupWorkflow($Workspace, $FixtureItem) {
         $otherItem = Read-ModJar $FixtureItem.Path
         $otherItem.Minecraft = '26.2'
         $otherEffective = Get-EffectiveModSettings (Import-PowerShellDataFile -LiteralPath $setupPath) $otherItem
-        Assert (-not (Get-Setting (Get-Setting $otherEffective 'InteractiveSetup' @{}) 'RuntimeComplete' $false)) 'Runtime setup isolated from different Minecraft targets'
+        Assert ($otherEffective.Runtime.Environment -eq 'client_only') 'Client/server setting is shared with different Minecraft targets'
         # Force review, accept existing defaults, and clear dependencies interactively.
-        foreach ($answer in @('', '', '', '', 'none', 'no')) { $answers.Enqueue($answer) }
+        foreach ($answer in @('', '', '', 'none', 'no')) { $answers.Enqueue($answer) }
         Invoke-ModPublishSetup $Workspace @($FixtureItem) 'Modrinth' @{} -Configure
         Assert ($answers.Count -eq 0) 'Configure supports reviewing saved settings'
         $reviewed = @(Get-UploadPlan $Workspace @($FixtureItem) 'Modrinth')[0]
@@ -58,8 +57,8 @@ function Test-PublishSetupWorkflow($Workspace, $FixtureItem) {
         # Metadata errors detected by the real planner reopen setup instead of
         # persisting a completed but unusable configuration.
         foreach ($answer in @(
-            '', '', '', '', 'keep', 'yes', '', '', 'Server', '',
-            '', '', '', 'keep', 'no'
+            '', '', 'keep', 'yes', '', '', 'Server', '',
+            '', 'keep', 'no'
         )) { $answers.Enqueue($answer) }
         Invoke-ModPublishSetup $Workspace @($FixtureItem) 'CurseForge' @{} -Configure
         Assert ($answers.Count -eq 0) 'Invalid advanced compatibility tag reopens setup for correction'
@@ -70,11 +69,11 @@ function Test-PublishSetupWorkflow($Workspace, $FixtureItem) {
         New-TestJar $forgePath 'META-INF/mods.toml'
         try {
             $forgeItem = Read-ModJar $forgePath
-            foreach ($answer in @('client_and_server', 'release', 'keep', 'no')) { $answers.Enqueue($answer) }
+            foreach ($answer in @('keep', 'no')) { $answers.Enqueue($answer) }
             Invoke-ModPublishSetup $Workspace @($forgeItem) 'CurseForge' @{}
-            Assert ($answers.Count -eq 0) 'Forge setup asks for explicit client/server requirements'
+            Assert ($answers.Count -eq 0) 'A new loader reuses the mod-wide client/server setting without asking again'
             $forgePlan = @(Get-UploadPlan $Workspace @($forgeItem) 'CurseForge')[0]
-            Assert ($forgePlan.Runtime.Environment -eq 'client_and_server' -and $forgePlan.Data.gameVersionNames -contains 'Server') 'Forge setup produces a valid upload plan without manual config edits'
+            Assert ($forgePlan.Runtime.Environment -eq 'client_only' -and $forgePlan.Data.gameVersionNames -notcontains 'Server') 'Forge publishes with the same client/server setting already chosen for the mod'
         } finally { Remove-Item -LiteralPath $forgePath }
         $markdown = @(
             '**Added:**'

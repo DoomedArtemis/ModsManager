@@ -32,7 +32,7 @@ function Test-MultiJarPublishBatch($ParentWorkspace) {
     $answers = [Collections.Generic.Queue[string]]::new()
     $batchNotes = "**Added:**`n- New Clipboard entry type.`n`n**Changed:**`n- Updated the default profile."
     [IO.File]::WriteAllText((Join-Path $workspace.ModsRoot 'omniwheel/changelog.md'), "# OmniWheel changelog`n`n## 2.1.0`n`n$batchNotes`n`n## 2.0.0`n`nOlder release.`n")
-    foreach ($answer in @('omni-wheel', '', 'client_only', 'release', 'keep', 'no')) { $answers.Enqueue($answer) }
+    foreach ($answer in @('omni-wheel', '', 'client_only', 'keep', 'no')) { $answers.Enqueue($answer) }
     function Read-Host([string]$Prompt) {
         if ($Prompt -match 'Supported Java|Supported Minecraft') { throw 'Artifact targets must never be requested interactively.' }
         if (-not $answers.Count) { throw "Unexpected repeated batch prompt: $Prompt" }

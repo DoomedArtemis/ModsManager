@@ -1,3 +1,5 @@
+$script:ReviewedModEnvironments = @{}
+
 function ConvertTo-ModDataLiteral($Value, [int]$Indent = 0) {
     if ($null -eq $Value) { return '$null' }
     if ($Value -is [bool]) { if ($Value) { return '$true' }; return '$false' }
@@ -22,7 +24,10 @@ function Remove-ManualJavaSettings($Settings) {
     if ($Settings -is [Collections.IDictionary]) {
         foreach ($key in @($Settings.Keys)) {
             if ($key -eq 'Runtime' -and $Settings[$key] -is [Collections.IDictionary]) { $Settings[$key].Remove('JavaVersions'); $Settings[$key].Remove('MinecraftVersions') }
-            if ($key -in @('Modrinth', 'CurseForge') -and $Settings[$key] -is [Collections.IDictionary]) { $Settings[$key].Remove('Changelog') }
+            if ($key -in @('Modrinth', 'CurseForge') -and $Settings[$key] -is [Collections.IDictionary]) {
+                $Settings[$key].Remove('Changelog')
+                $Settings[$key].Remove('VersionType'); $Settings[$key].Remove('ReleaseType')
+            }
             Remove-ManualJavaSettings $Settings[$key]
         }
     } elseif ($Settings -is [Collections.IEnumerable] -and $Settings -isnot [string]) {
@@ -31,6 +36,7 @@ function Remove-ManualJavaSettings($Settings) {
 }
 
 function Save-ModSettings([string]$Path, [hashtable]$Settings) {
+    Move-ModEnvironmentToRoot $Settings
     Remove-ManualJavaSettings $Settings
     $temporary = $Path + '.tmp.psd1'
     $text = "# Saved by the interactive publishing setup. Tokens are never saved here.`n" + (ConvertTo-ModDataLiteral $Settings) + "`n"
@@ -139,8 +145,11 @@ function Read-SetupBool([string]$Label, [bool]$Default = $false) {
 function Read-SetupDependencies($Settings, $Item, [string]$Platform) {
     $existing = @(Get-Setting $Settings 'Dependencies' @())
     Write-Host "Current $Platform dependencies: $(ConvertTo-Json -InputObject $existing -Depth 15 -Compress)"
-    $action = Read-SetupChoice 'Dependencies for this release' @('keep', 'replace', 'none') @('Keep the displayed list (empty means none)', 'Enter a new dependency list', 'Publish without dependencies') 'keep'
+    $defaultAction = if ((Get-Setting $Settings 'DependencyMode' 'manual') -eq 'auto') { 'auto' } else { 'keep' }
+    $action = Read-SetupChoice 'Dependencies for this release' @('keep', 'replace', 'none', 'auto') @('Keep the saved dependency mode and list', 'Enter a manual dependency list', 'Publish without dependencies', 'Scan each JAR separately and use its declared dependencies') $defaultAction
     if ($action -eq 'keep') { return ,$existing }
+    if ($action -eq 'auto') { $Settings.DependencyMode = 'auto'; return ,@() }
+    $Settings.DependencyMode = 'manual'
     if ($action -eq 'none') { return ,@() }
     $result = @()
     while ($true) {
@@ -171,18 +180,19 @@ function Read-SetupDependencies($Settings, $Item, [string]$Platform) {
     return ,$result
 }
 
-function Read-SetupRuntime($Effective, $Item) {
+function Read-SetupRuntime($Effective, $Item, [switch]$SkipEnvironmentPrompt) {
     $runtime = Merge-ModSettings @{} (Get-Setting $Effective 'Runtime' @{})
     $runtime.Remove('JavaVersions')
     $runtime.Remove('MinecraftVersions')
-    $environments = @('client_and_server', 'client_only', 'server_only', 'dedicated_server_only', 'server_only_client_optional', 'client_only_server_optional', 'client_or_server', 'client_or_server_prefers_both', 'singleplayer_only')
+    $environments = @(Get-ModEnvironments)
     $help = @('Required on both client and server', 'Client only; works with vanilla servers', 'Server only; also works in singleplayer', 'Dedicated server only; no singleplayer', 'Server required, client optional', 'Client required, server optional', 'Works independently on either side', 'Works on either side; extra features with both', 'Only works in singleplayer')
     $defaultEnvironment = [string](Get-Setting $runtime 'Environment' '')
     if ($defaultEnvironment -notin $environments) {
         $defaultEnvironment = switch ($Item.RuntimeEvidence.ManifestEnvironment) { client { 'client_only' }; server { 'dedicated_server_only' }; default { '' } }
     }
     while ($true) {
-        $runtime.Environment = Read-SetupChoice 'Where must players install this mod?' $environments $help $defaultEnvironment
+        if ($SkipEnvironmentPrompt) { $runtime.Environment = $defaultEnvironment }
+        else { $runtime.Environment = Read-SetupChoice 'Where must players install this mod? (saved once for the entire mod)' $environments $help $defaultEnvironment }
         Write-Host "Compiled Java target: $($Item.RuntimeEvidence.BytecodeMinimumJava). Java is selected automatically from Minecraft's runtime metadata."
         if ($Item.RuntimeEvidence.ManifestConstraints.Count) { Write-Host "Manifest requirements: $($Item.RuntimeEvidence.ManifestConstraints | ConvertTo-Json -Depth 10 -Compress)" }
         Write-Host "Minecraft $($Item.Minecraft), loader $($Item.Loader) and mod version $($Item.Release) are read from the JAR."
@@ -194,7 +204,7 @@ function Read-SetupRuntime($Effective, $Item) {
             foreach ($requirement in $resolved.JavaRequirements) { Write-Host "Minecraft $($requirement.Minecraft): automatically using Java $($requirement.JavaMajor)." }
             return $runtime
         } catch {
-            if ($_.Exception.Message.StartsWith('Automatic Java:')) { throw }
+            if ($SkipEnvironmentPrompt -or $_.Exception.Message.StartsWith('Automatic Java:')) { throw }
             Write-Host $_.Exception.Message; $defaultEnvironment = $runtime.Environment
         }
     }
@@ -206,11 +216,13 @@ function Invoke-ModVariantSetup($Workspace, $Items, [string]$Platform, [hashtabl
         New-ModSettings $Workspace $item.Mod
         $path = Join-Path (Join-Path $Workspace.ModsRoot $item.Mod) 'mod.publish.psd1'
         $config = Import-PowerShellDataFile -LiteralPath $path
+        Move-ModEnvironmentToRoot $config
         $effective = Get-EffectiveModSettings $config $item
         $platformSettings = Get-Setting $effective $Platform @{}
         if (-not (Get-Setting $platformSettings 'Enabled' $true)) { continue }
         $setup = Get-Setting $effective 'InteractiveSetup' @{}
-        $runtimeNeeded = $Configure -or -not (Get-Setting $setup 'RuntimeComplete' $false)
+        $environmentNeeded = (Get-SharedModEnvironment $config) -notin @(Get-ModEnvironments) -or ($Configure -and -not $script:ReviewedModEnvironments.ContainsKey($path))
+        $runtimeNeeded = $environmentNeeded -or $Configure -or -not (Get-Setting $setup 'RuntimeComplete' $false)
         $platformNeeded = $Configure -or -not (Get-Setting $setup ($Platform + 'Complete') $false)
         Write-Host "Release: $($item.Mod) $($item.Release), $($item.Loader), Minecraft $($item.Minecraft)"
         while ($true) {
@@ -238,16 +250,19 @@ function Invoke-ModVariantSetup($Workspace, $Items, [string]$Platform, [hashtabl
                 }
                 $saved = @{ InteractiveSetup = @{} }
                 if ($runtimeNeeded) {
-                    $saved.Runtime = Read-SetupRuntime $effective $item
+                    $saved.Runtime = Read-SetupRuntime $effective $item -SkipEnvironmentPrompt:(-not $environmentNeeded)
+                    $config.Runtime = Merge-ModSettings (Get-Setting $config 'Runtime' @{}) @{ Environment = $saved.Runtime.Environment }
+                    $saved.Runtime.Remove('Environment')
+                    if ($environmentNeeded -and $Configure) { $script:ReviewedModEnvironments[$path] = $true }
+                    $environmentNeeded = $false
                     $saved.InteractiveSetup.RuntimeComplete = $true
                 }
                 if ($platformNeeded) {
                     $settings = Merge-ModSettings @{} $platformSettings
                     # Project references are shared at mod level, not pinned to a release.
                     $settings.Remove('Project')
-                    $typeKey = 'VersionType'
-                    if ($Platform -eq 'CurseForge') { $typeKey = 'ReleaseType' }
-                    $settings[$typeKey] = Read-SetupChoice 'Release channel' @('release', 'beta', 'alpha') @('Stable release', 'Beta testing release', 'Early testing release') ([string](Get-Setting $settings $typeKey 'release'))
+                    $settings.Remove('VersionType'); $settings.Remove('ReleaseType')
+                    Write-Host "Automatic release channel for $($item.Release): $(Get-ModReleaseType $item.Release)"
                     $settings.Remove('Changelog')
                     $settings.Dependencies = Read-SetupDependencies $settings $item $Platform
                     if (Read-SetupBool 'Configure advanced publishing settings (visibility, featured/manual release, extra tags)?') {
@@ -270,7 +285,8 @@ function Invoke-ModVariantSetup($Workspace, $Items, [string]$Platform, [hashtabl
                     $saved[$Platform] = $settings
                     $saved.InteractiveSetup[$Platform + 'Complete'] = $true
                 }
-                # Exact selectors keep the answers from changing older releases or other loaders.
+                # Platform and preview options remain variant-specific; the
+                # client/server answer above is stored only at mod level.
                 $rule = @{ Versions = @($item.Minecraft); Loaders = @($item.Loader); ReleaseVersions = @($item.Release); Settings = $saved }
                 $config.Overrides = @(Get-Setting $config 'Overrides' @()) + @($rule)
             }
@@ -310,7 +326,7 @@ function Invoke-ModPublishSetup($Workspace, $Items, [string]$Platform, [hashtabl
         }; Descending = $true })
         $representative = $ranked[0]
         Write-Host "Publishing batch: $modName $($representative.Release), $($members.Count) JAR(s). Shared settings are asked once."
-        $members | Select-Object FileName, Loader, Minecraft, @{ Name = 'Java'; Expression = { (Get-MinecraftJavaRequirement $_.Minecraft).JavaMajor } } | Format-Table -AutoSize | Out-Host
+        $members | Select-Object FileName, Loader, @{ Name = 'Minecraft'; Expression = { (Resolve-MinecraftVersions $_.Minecraft) -join ', ' } }, @{ Name = 'Java'; Expression = { (@(Resolve-MinecraftVersions $_.Minecraft) | ForEach-Object { (Get-MinecraftJavaRequirement $_).JavaMajor } | Sort-Object -Unique) -join ', ' } } | Format-Table -AutoSize | Out-Host
         Invoke-ModVariantSetup $Workspace @($representative) $Platform $Projects -Configure:$Configure -PromptForProject:$PromptForProject -PromptForChangelog:$PromptForChangelog -ChangelogInput $ChangelogInput
         $config = Import-PowerShellDataFile -LiteralPath $path
         $shared = Get-EffectiveModSettings $config $representative
@@ -321,8 +337,7 @@ function Invoke-ModPublishSetup($Workspace, $Items, [string]$Platform, [hashtabl
             $saved = @{ InteractiveSetup = @{} }
             if ($Configure -or -not (Get-Setting $previousSetup 'RuntimeComplete' $false)) {
                 $runtime = Merge-ModSettings @{} (Get-Setting $shared 'Runtime' @{})
-                if ($member.RuntimeEvidence.ManifestEnvironment -eq 'client' -and $runtime.Environment -notin @('client_only', 'singleplayer_only')) { $runtime.Environment = 'client_only' }
-                if ($member.RuntimeEvidence.ManifestEnvironment -eq 'server') { $runtime.Environment = 'dedicated_server_only' }
+                $runtime.Remove('Environment')
                 $saved.Runtime = $runtime
                 $saved.InteractiveSetup.RuntimeComplete = $true
             }

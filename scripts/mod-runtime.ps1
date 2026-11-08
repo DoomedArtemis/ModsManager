@@ -1,6 +1,6 @@
 # Runtime declarations describe the existing binary; they never rewrite the JAR.
 $script:MinecraftJavaCache = $null
-function Get-MinecraftJavaRequirement([string]$Version) {
+function Get-MinecraftJavaMapping {
     $path = Join-Path (Split-Path $PSScriptRoot -Parent) 'config/minecraft-java.json'
     if (-not (Test-Path -LiteralPath $path)) { throw 'Automatic Java: shared mapping is missing. Run scripts/sync-minecraft-java.ps1.' }
     $file = Get-Item -LiteralPath $path
@@ -10,7 +10,13 @@ function Get-MinecraftJavaRequirement([string]$Version) {
         $lookup = [Collections.Generic.Dictionary[string,object]]::new([StringComparer]::Ordinal)
         foreach ($property in $data.Versions.PSObject.Properties) { $lookup[$property.Name] = $property.Value }
         $script:MinecraftJavaCache = @{ Timestamp = $file.LastWriteTimeUtc.Ticks; Lookup = $lookup }
+        $script:MinecraftVersionExpansionCache = @{}
     }
+    return $script:MinecraftJavaCache.Lookup
+}
+
+function Get-MinecraftJavaRequirement([string]$Version) {
+    $null = Get-MinecraftJavaMapping
     if (-not $script:MinecraftJavaCache.Lookup.ContainsKey($Version)) { throw "Automatic Java: Minecraft '$Version' is not in the shared mapping. Run scripts/sync-minecraft-java.ps1; no Java version will be guessed." }
     $entry = $script:MinecraftJavaCache.Lookup[$Version]
     if ($null -eq $entry.JavaMajor -or [int]$entry.JavaMajor -le 0) { throw "Automatic Java: Mojang provides no Java runtime metadata for '$Version'; this historical version cannot be assigned automatically." }
@@ -95,6 +101,33 @@ function Merge-ModSettings([hashtable]$Base, [hashtable]$Override) {
     return $result
 }
 
+function Get-ModEnvironments {
+    return @('client_and_server', 'client_only', 'server_only', 'dedicated_server_only', 'server_only_client_optional', 'client_only_server_optional', 'client_or_server', 'client_or_server_prefers_both', 'singleplayer_only')
+}
+
+function Get-SharedModEnvironment([hashtable]$Config) {
+    $environment = [string](Get-Setting (Get-Setting $Config 'Runtime' @{}) 'Environment' 'auto')
+    if ($environment -and $environment -ne 'auto') { return $environment }
+    # Existing workspaces stored the same answer in many variant overrides.
+    $legacy = @(@(Get-Setting $Config 'Overrides' @()) | ForEach-Object {
+        $runtime = Get-Setting (Get-Setting $_ 'Settings' @{}) 'Runtime' @{}
+        [string](Get-Setting $runtime 'Environment' '')
+    } | Where-Object { $_ -and $_ -ne 'auto' } | Sort-Object -Unique)
+    if ($legacy.Count -eq 1) { return $legacy[0] }
+    return 'auto'
+}
+
+function Move-ModEnvironmentToRoot([hashtable]$Config) {
+    $environment = Get-SharedModEnvironment $Config
+    # Conflicting legacy answers need one explicit mod-wide choice in setup.
+    if ($environment -eq 'auto') { return }
+    $Config.Runtime = Merge-ModSettings (Get-Setting $Config 'Runtime' @{}) @{ Environment = $environment }
+    foreach ($rule in @(Get-Setting $Config 'Overrides' @())) {
+        $settings = Get-Setting $rule 'Settings' @{}
+        if ($settings.ContainsKey('Runtime')) { $settings.Runtime.Remove('Environment') }
+    }
+}
+
 function Get-EffectiveModSettings([hashtable]$Config, $Item) {
     $result = Merge-ModSettings @{} $Config
     foreach ($rule in @(Get-Setting $Config 'Overrides' @())) {
@@ -104,6 +137,8 @@ function Get-EffectiveModSettings([hashtable]$Config, $Item) {
         if ($settings -isnot [hashtable]) { throw 'Override Settings must be a hashtable.' }
         $result = Merge-ModSettings $result $settings
     }
+    # Installation requirements belong to the mod, never a loader/game/release.
+    $result.Runtime = Merge-ModSettings (Get-Setting $result 'Runtime' @{}) @{ Environment = (Get-SharedModEnvironment $Config) }
     return $result
 }
 
@@ -123,13 +158,13 @@ function Get-ModRuntime($Config, $Item) {
             default { '' }
         }
     }
-    $allowed = @('client_and_server', 'client_only', 'client_only_server_optional', 'singleplayer_only', 'server_only', 'server_only_client_optional', 'dedicated_server_only', 'client_or_server', 'client_or_server_prefers_both')
+    $allowed = @(Get-ModEnvironments)
     if ($environment -notin $allowed) { throw "Set Runtime.Environment for $($Item.FileName): the manifest cannot establish client/server installation requirements. Use a documented Modrinth environment value." }
     if ($evidence.ManifestEnvironment -eq 'client' -and $environment -notin @('client_only', 'singleplayer_only')) { throw 'Runtime.Environment conflicts with a client-only loader manifest.' }
     if ($evidence.ManifestEnvironment -eq 'server' -and $environment -ne 'dedicated_server_only') { throw 'Runtime.Environment conflicts with a dedicated-server-only loader manifest.' }
     # Each compiled artifact advertises its own Minecraft target, never the
     # target saved during setup for a different JAR in the same release.
-    $gameVersions = @($Item.Minecraft)
+    $gameVersions = @(Resolve-MinecraftVersions $Item.Minecraft)
     foreach ($game in $gameVersions) {
         if ($game -isnot [string] -or $game -notmatch '^[0-9][a-zA-Z0-9.+_-]*$') { throw 'Invalid Runtime.MinecraftVersions entry.' }
     }

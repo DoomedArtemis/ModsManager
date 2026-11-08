@@ -43,7 +43,7 @@ if ($PromptForMod) {
     }
 }
 if ($PromptForVersion) {
-    $answer = Read-Host 'Minecraft versions (e.g. 1.21.1,26.2..26.3, or all) [all]'
+    $answer = Read-Host 'Minecraft versions (e.g. 26.1.x,1.21.1-1.21.3, or all) [all]'
     if ($answer) { $Version = @($answer) }
 }
 $items = @(Get-PublishItems $workspace $Mod $Version $Loader $ReleaseVersion $Source)
