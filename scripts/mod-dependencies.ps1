@@ -29,7 +29,7 @@ function Get-JarDependencyDeclarations($Zip, [string]$Loader, $Manifest) {
         foreach ($dep in $Manifest.Dependencies) {
             $type = [string](Get-Setting $dep 'type' '')
             if (-not $type) { $type = if (Get-Setting $dep 'mandatory' $true) { 'required' } else { 'optional' } }
-            if ($type -notin @('required', 'optional', 'incompatible')) { $type = 'review' }
+            if ($type -notin @('required', 'optional', 'incompatible', 'discouraged')) { $type = 'review' }
             $declarations += [pscustomobject]@{ ModId = [string](Get-Setting $dep 'modId' ''); Type = $type; Constraint = (Get-Setting $dep 'versionRange' '*'); Source = 'dependencies'; Side = (Get-Setting $dep 'side' 'BOTH') }
         }
     }
@@ -59,6 +59,7 @@ function Get-JarDependencyDeclarations($Zip, [string]$Loader, $Manifest) {
         if ($dep.ModId -in @('minecraft', 'java', 'fabricloader', 'quilt_loader', 'forge', 'neoforge', 'fml')) { $ignored = 'runtime' }
         elseif ($dep.ModId -and $dep.ModId -in $provided) { $ignored = 'provided by this JAR' }
         elseif ($dep.ModId -and $dep.ModId -in $bundled -and $dep.Type -ne 'incompatible') { $ignored = 'bundled inside this JAR' }
+        elseif ($dep.Type -eq 'discouraged') { $ignored = 'discouraged dependency' }
         $dep | Add-Member -NotePropertyName Ignored -NotePropertyValue $ignored
         $dep
     }

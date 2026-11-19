@@ -1,5 +1,40 @@
 # Cybernetic Enhancements changelog
 
+## 0.3b
+
+## Added
+
+- **Redesigned player HUD:** a quieter look for the whole overlay, with a health bar that fills smoothly when you heal. Show, hide, and restyle elements from the Neural Archive's HUD tab.
+- **Quests in the Nether and the End:** contracts can now send you to other dimensions. Harder trips pay more, **+25% for the Nether and +35% for the End**.
+- **Neural Link calls:** talk to contacts while you play. Use **K** for quick-call contacts and **Alt + number** to call, accept contracts, or arrange meetings. Contacts can also call you.
+- **Player voice calls** through Neural Link, with optional **Simple Voice Chat** support.
+- **Remote hand-in:** complete ready quests by calling the issuer from the HUD, and request replacements for lost delivery packages at a reduced reward.
+- **Med-techs and Trauma Team coverage:** buy emergency rescue and revival for when you go down.
+- **NPC dispositions:** NPCs track trust, mood, and aggression toward each player, and heal themselves in combat.
+- **Personal journal:** browse a persistent event log from the main menu with search, filters, and sorting. Server history is saved locally and readable offline.
+- **Compass HUD** with quest markers, turn-in markers, and named banner landmarks, plus personal markers (**Alt+M**) managed in the Neural Archive's new **Compass** tab.
+- **Compact quest panels** for collection, elimination, survey, and travel progress.
+- **Dropoff Point** and **Iron Quest Crate** for delivery contracts.
+- **Chromium:** new ore, large veins, and ingots, with survey contracts to find it.
+- **Tarot cards** to discover and scan in the world, with a collection browser.
+- **Cyberpsycho encounters** with aftermath, plus **MaxTac** response squads, MaxTec guards, and street ripperdocs.
+- **World encounters**, starting with **Med Tec AV**: a guarded medical outpost with its own crew, loot, and quest. A holographic barrier at its door shows whether the crew still deal with you or have turned hostile.
+- **Sound design** for the interface, calls, contracts, NPCs, and encounters.
+- **Join animation, launch intro, title slideshow, loading screen, and Flatlined death screen**, with restyled vanilla menus. All can be disabled in the config.
+- **Interactive tutorial world** and **psychosis presentation** with intro, blindness, and recovery.
+- **Jade tooltips** for NPCs, stations, crates, and caches.
+- **Server-enforced client settings** for server owners, documented in `CONFIG.md`.
+- **Compatibility defaults** when **FancyMenu**, **Drippy Loading Screen**, **PackMenu**, or **Custom Main Menu** is detected.
+- **Banking history** with daily transactions and a player directory for transfers.
+- **Debug commands** for encounters, dropoffs, holograms, and calls.
+
+## Changed
+
+- **Reworked crafting stations:** new layouts, a vertical implant status gauge, smoother progress animation, hopper and pipe **automation**, and correct GUI scaling.
+- Expanded **JEI integration** to repair, upgrades, and recycling, with recipe transfer into stations.
+- **Neural Archive** gains the Compass tab and journal access, and its tabs are reorderable.
+- Updated the wiki and documentation.
+
 ## 0.2b
 
 ## Added

@@ -5,3 +5,4 @@ config/publish-state.local.json.tmp
 config/minecraft-java.json.tmp
 .idea/workspace.xml
 .idea/shelf/
+.idea/claudeCodeTabState.xml

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ClaudeCodeTabState">
+    <option name="tabSessions">
+      <map>
+        <entry key="0">
+          <value>
+            <TabSessionState>
+              <option name="projectPath" value="C:\Users\grego\Documents\IdeaProjects\ModsManager" />
+              <option name="provider" value="claude" />
+              <option name="sessionId" value="a9702dd3-2de3-4cee-90ab-5b676283c4d1" />
+              <option name="cwd" value="C:\Users\grego\Documents\IdeaProjects\ModsManager" />
+              <option name="model" value="claude-sonnet-5" />
+              <option name="permissionMode" value="auto" />
+              <option name="claudeSupplierId" value="__cli_login__" />
+              <option name="codexSupplierId" value="__session_supplier_unavailable__" />
+              <option name="ompApprovalMode" value="" />
+            </TabSessionState>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>
