@@ -74,6 +74,33 @@
             'Versions' = @(
                 '1.21.1'
             )
+        },
+        @{
+            'Loaders' = @(
+                'neoforge'
+            )
+            'ReleaseVersions' = @(
+                '0.4b'
+            )
+            'Settings' = @{
+                'CurseForge' = @{
+                    'ChangelogType' = 'markdown'
+                    'Dependencies' = @()
+                    'DependencyMode' = 'auto'
+                    'Enabled' = $true
+                    'ManualRelease' = $false
+                }
+                'InteractiveSetup' = @{
+                    'CurseForgeComplete' = $true
+                    'RuntimeComplete' = $true
+                }
+                'Runtime' = @{
+                    'AllowPreviewFeatures' = $false
+                }
+            }
+            'Versions' = @(
+                '1.21.1'
+            )
         }
     )
     'Runtime' = @{
